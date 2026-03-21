@@ -95,10 +95,10 @@ P2_font = pygame.font.SysFont("arial", 36)
 P3_font = pygame.font.SysFont("arial", 36)
 P4_font = pygame.font.SysFont("arial", 36)
 
-player1_label = PlayerLabel(human1, 600, 5, P1_font, (19, 126, 168), rotation=0)
-player2_label = PlayerLabel(ai1, 1110, 400, P2_font,(19, 126, 168), rotation=90)
-player3_label = PlayerLabel(ai2, 600, 750, P3_font, (19, 126, 168), rotation= 0)
-player4_label = PlayerLabel(ai3, 40, 400, P4_font,(19, 126, 168), rotation = 270)
+player1_label = PlayerLabel(human1, 500, 5, P1_font, (19, 126, 168), rotation=0)
+player2_label = PlayerLabel(ai1, 1110, 350, P2_font,(19, 126, 168), rotation=90)
+player3_label = PlayerLabel(ai2, 500, 750, P3_font, (19, 126, 168), rotation= 0)
+player4_label = PlayerLabel(ai3, 40, 350, P4_font,(19, 126, 168), rotation = 270)
 
 
 
@@ -299,10 +299,10 @@ while running:
         # Initializes the bid_winner as the new current_trick_player
         # Sets positions for dominoes to move into when they are played
         play_positions = [
-            (350, 400),  # Position for 1st domino played
-            (475, 400),  # Position for 2nd domino played
-            (600, 400),  # Position for 3rd domino played
-            (725, 400)  # Position for 4th domino played
+            (350, 350),  # Position for 1st domino played
+            (475, 350),  # Position for 2nd domino played
+            (600, 350),  # Position for 3rd domino played
+            (725, 350)  # Position for 4th domino played
         ]
 
         for i, (player, domino) in enumerate(played_dominoes):
@@ -363,18 +363,18 @@ while running:
                         current_trick_player_index = (current_trick_player_index + 1) % 4
                         current_trick_player = players[current_trick_player_index]
                         break
-        # Move all trick dominoes to the bottom of the screen, shrunk
-        corner_x = 500
-        corner_y = 530
-        for trick_number, trick in enumerate(trick_history):  # Loop through each trick
-            for domino_num, (player, domino) in enumerate(trick):  # Loop through each domino in the trick
-                domino_image = domino_images[domino.name]  # Get the image
-                small_domino = pygame.transform.scale(domino_image, (46, 26))  # Shrink it
-                x_pos = corner_x + (domino_num * 66)
-                y_pos = corner_y + (trick_num * 35)
-                screen.blit(small_domino, (x_pos, y_pos))
-                # Now draw small_domino at the appropriate position'
 
+            # Move all trick dominoes to the bottom of the screen, shrunk
+            corner_x = 500
+            corner_y = 390
+            for trick_index, trick in enumerate(trick_history):  # Loop through each trick
+                for domino_num, (player, domino) in enumerate(trick):  # Loop through each domino in the trick
+                    domino_image = domino_images[domino.name]  # Get the image
+                    small_domino = pygame.transform.scale(domino_image, (46, 26))  # Shrink it
+                    x_pos = corner_x + (domino_num * 66)
+                    y_pos = corner_y + (trick_index * 35)
+                    screen.blit(small_domino, (x_pos, y_pos))
+                    # Now draw small_domino at the appropriate position'
 
         if len(played_dominoes) == 4:
             game_state = "calculate_trick_winner"
@@ -395,12 +395,17 @@ while running:
         print(f"{trick_winner.name} won trick #{trick_num} for {trick_points} points!")
 
         trick_num += 1
-        print(f'Debug: the trick number is {trick_num}')
+        #print(f'Debug: the trick number is {trick_num}')
         if trick_num > 7:
             game_state = "calculate_game_winner"
             print("Calculating game winner")
         else:
             game_state = "trick_play"
+
+
+
+
+
 
     if game_state == "calculate_game_winner":
         winning_team = calculate_game_winner(bid_winner, highest_bid, team_1_trick_points, team_2_trick_points)
@@ -429,6 +434,9 @@ while running:
 
         #turn_text = font.render(f"{current_trick_player.name}'s turn", True, green)
         #screen.blit(turn_text, (400, 250))
+
+
+
 
     # Update the display
     pygame.display.flip()
