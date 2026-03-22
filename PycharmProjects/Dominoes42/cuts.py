@@ -273,7 +273,7 @@ trump4_button.draw(screen)
 trump5_button.draw(screen)
 trump6_button.draw(screen)
 notrump_button.draw(screen)
-
+##################################################################################################
 '''if bis_button.is_clicked((mouse_x, mouse_y)):
                    bid_text30 = font.render(f"Player {current_bidder} bid 30", True, green)
                    screen.blit(bidder_text, (400, 200))
@@ -296,7 +296,7 @@ notrump_button.draw(screen)
                    print(f"{current_player.name} passed")
                    current_bidder += 1'''
 
-
+####################################################################################################################
 '''# Special bids
 bid_buttons['pass'] = load_image_safe('images/BidPass.png', 50, 50)
 bid_buttons[84] = load_image_safe('images/Bid84.png', 50, 50)
@@ -318,6 +318,63 @@ trump4_button = ImageButton(600, 300, 70, 70, trump_buttons[4])
 trump5_button = ImageButton(675, 300, 70, 70, trump_buttons[5])
 trump6_button = ImageButton(750, 300, 70, 70, trump_buttons[6])
 notrump_button = ImageButton(825, 300, 150, 70, trump_buttons['notrump'])'''
+
+####################################################################################
+
+if game_state == "trump_selection":
+    if trump_buttons[0].is_clicked((mouse_x, mouse_y)):
+        trump = 0
+        print(f'Trump is: {trump}')
+    elif trump_buttons[1].is_clicked((mouse_x, mouse_y)):
+        trump = 1
+        print(f'Trump is: {trump}')
+    elif trump_buttons[2].is_clicked((mouse_x, mouse_y)):
+        trump = 2
+        print(f'Trump is: {trump}')
+    elif trump_buttons[3].is_clicked((mouse_x, mouse_y)):
+        trump = 3
+        print(f'Trump is: {trump}')
+    elif trump_buttons[4].is_clicked((mouse_x, mouse_y)):
+        trump = 4
+        print(f'Trump is: {trump}')
+    elif trump_buttons[5].is_clicked((mouse_x, mouse_y)):
+        trump = 5
+        print(f'Trump is: {trump}')
+    elif trump_buttons[6].is_clicked((mouse_x, mouse_y)):
+        trump = 6
+        print(f'Trump is: {trump}')
+    elif trump_buttons['no_trump'].is_clicked((mouse_x, mouse_y)):
+        trump = "no trump"
+        print(f'Trump is: {trump}')
+
+    game_state = "trick_play"
+#################################################################################################
+'''if bid_buttons[30].is_clicked((mouse_x, mouse_y)):
+                    bid_text30 = font.render(f"Player {current_bidder} bid 30", True, green)
+                    #screen.blit(bidder_text, (400, 200))
+                    print(f"{current_player.name} bid 30")
+                    current_player.bid = 30
+                    current_bidder += 1
+                elif bid_buttons[31].is_clicked((mouse_x, mouse_y)):
+                    print(f"{current_player.name} bid 31")
+                    current_player.bid = 31
+                    current_bidder += 1
+                elif bid_buttons[32].is_clicked((mouse_x, mouse_y)):
+                    print(f"{current_player.name} bid 32")
+                    current_player.bid = 32
+                    current_bidder += 1
+                elif bid_buttons[84].is_clicked((mouse_x, mouse_y)):
+                    print(f"{current_player.name} bid 84")
+                    current_player.bid = 84
+                    current_bidder += 1
+                elif pass_button.is_clicked((mouse_x, mouse_y)):
+                    print(f"{current_player.name} passed")
+                    current_bidder += 1
+                if current_bidder > 4:  #once all 4 players have bid...
+                    game_state = "calculate_bid_winner"'''
+#########################################################################################################
+
+
 
 
 

@@ -101,8 +101,6 @@ player3_label = PlayerLabel(ai2, 500, 750, P3_font, (19, 126, 168), rotation= 0)
 player4_label = PlayerLabel(ai3, 40, 350, P4_font,(19, 126, 168), rotation = 270)
 
 
-
-
 # Game loop
 running = True
 clock = pygame.time.Clock()
@@ -130,58 +128,39 @@ while running:
             mouse_x, mouse_y = event.pos
             # Allow players to make bids
             if game_state == "bidding":
+                if current_player.is_human:
+                    try:
+                        for bid_value in bid_buttons.keys():
+                            if bid_buttons[bid_value].is_clicked((mouse_x, mouse_y)):
+                                current_player.bid = bid_value
+                                print(f'{current_player.name} bid {bid_value}')
+                                current_bidder += 1
+                                break
+                    except KeyError as e:
+                        print(f"Bid button key error: {e}")
+                else:
+                    current_player.bid = 'pass'
+                    current_bidder += 1
 
-                if bid_buttons[30].is_clicked((mouse_x, mouse_y)):
-                    bid_text30 = font.render(f"Player {current_bidder} bid 30", True, green)
-                    #screen.blit(bidder_text, (400, 200))
-                    print(f"{current_player.name} bid 30")
-                    current_player.bid = 30
-                    current_bidder += 1
-                elif bid_buttons[31].is_clicked((mouse_x, mouse_y)):
-                    print(f"{current_player.name} bid 31")
-                    current_player.bid = 31
-                    current_bidder += 1
-                elif bid_buttons[32].is_clicked((mouse_x, mouse_y)):
-                    print(f"{current_player.name} bid 32")
-                    current_player.bid = 32
-                    current_bidder += 1
-                elif bid_buttons[84].is_clicked((mouse_x, mouse_y)):
-                    print(f"{current_player.name} bid 84")
-                    current_player.bid = 84
-                    current_bidder += 1
-                elif pass_button.is_clicked((mouse_x, mouse_y)):
-                    print(f"{current_player.name} passed")
-                    current_bidder += 1
-                if current_bidder > 4:  #once all 4 players have bid...
+                if current_bidder > 4:
                     game_state = "calculate_bid_winner"
+
+
+
 
             # winning_bidder makes a trump selection -
             # still have to figure out how to disallow other players from clicking trump buttons
+
             if game_state == "trump_selection":
-                if trump_buttons[0].is_clicked((mouse_x, mouse_y)):
-                    trump = 0
-                    print(f'Trump is: {trump}')
-                elif trump_buttons[1].is_clicked((mouse_x, mouse_y)):
-                    trump = 1
-                    print(f'Trump is: {trump}')
-                elif trump_buttons[2].is_clicked((mouse_x, mouse_y)):
-                    trump = 2
-                    print(f'Trump is: {trump}')
-                elif trump_buttons[3].is_clicked((mouse_x, mouse_y)):
-                    trump = 3
-                    print(f'Trump is: {trump}')
-                elif trump_buttons[4].is_clicked((mouse_x, mouse_y)):
-                    trump = 4
-                    print(f'Trump is: {trump}')
-                elif trump_buttons[5].is_clicked((mouse_x, mouse_y)):
-                    trump = 5
-                    print(f'Trump is: {trump}')
-                elif trump_buttons[6].is_clicked((mouse_x, mouse_y)):
-                    trump = 6
-                    print(f'Trump is: {trump}')
-                elif trump_buttons['no_trump'].is_clicked((mouse_x, mouse_y)):
-                    trump = "no trump"
-                    print(f'Trump is: {trump}')
+                try:
+                    for trump_value in trump_buttons.keys():
+                        if trump_buttons[trump_value].is_clicked((mouse_x, mouse_y)):
+                            trump = trump_value
+                            print(f'Trump is: {trump}')
+                            game_state = "trick_play"
+                            break
+                except KeyError as e:
+                    print(f"Trump button key error: {e}")
 
                 game_state = "trick_play"
 
@@ -299,16 +278,20 @@ while running:
         # Initializes the bid_winner as the new current_trick_player
         # Sets positions for dominoes to move into when they are played
         play_positions = [
-            (350, 350),  # Position for 1st domino played
-            (475, 350),  # Position for 2nd domino played
-            (600, 350),  # Position for 3rd domino played
-            (725, 350)  # Position for 4th domino played
+            (350, 300),  # Position for 1st domino played
+            (475, 300),  # Position for 2nd domino played
+            (600, 300),  # Position for 3rd domino played
+            (725, 300)  # Position for 4th domino played
         ]
 
         for i, (player, domino) in enumerate(played_dominoes):
             if i < len(play_positions):  # Safety check
-                domino_image = domino_images[domino.name]
-                screen.blit(domino_image, play_positions[i])
+                try:
+                    domino_image = domino_images[domino.name]
+                    screen.blit(domino_image, play_positions[i])
+                except KeyError as e:
+                    print(f'Domino image not found: {e}')
+
 
         if current_trick_player is None:
             current_trick_player_index = players.index(bid_winner)
@@ -365,7 +348,7 @@ while running:
                         break
 
             # Move all trick dominoes to the bottom of the screen, shrunk
-            corner_x = 500
+            corner_x = 480
             corner_y = 390
             for trick_index, trick in enumerate(trick_history):  # Loop through each trick
                 for domino_num, (player, domino) in enumerate(trick):  # Loop through each domino in the trick
@@ -401,11 +384,6 @@ while running:
             print("Calculating game winner")
         else:
             game_state = "trick_play"
-
-
-
-
-
 
     if game_state == "calculate_game_winner":
         winning_team = calculate_game_winner(bid_winner, highest_bid, team_1_trick_points, team_2_trick_points)
