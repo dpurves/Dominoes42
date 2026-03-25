@@ -1,7 +1,7 @@
 import pygame
 from Player import Player
 
-#class Domino(pygame.sprite.Sprite):
+
 #Base class for anything that appears on screen
 class ScreenElement:
 

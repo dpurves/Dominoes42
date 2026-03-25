@@ -1,4 +1,4 @@
-
+# this file contains all of the code that I cut out of the other files as I altered them.
 import pygame
 
 # Initialize Pygame
@@ -374,9 +374,41 @@ if game_state == "trump_selection":
                     game_state = "calculate_bid_winner"'''
 #########################################################################################################
 
+#class Domino(pygame.sprite.Sprite):
 
+'''if game_state == "calculate_trick_winner":
+    trick_winner, trick_points = calculate_trick_winner(played_dominoes, trump)
+    if trick_winner.team == 1:
+        team_1_trick_points += trick_points
+    else:
+        team_2_trick_points += trick_points
+    current_trick_player = trick_winner
+    current_trick_player_index = players.index(trick_winner)
+    trick_history.append(played_dominoes.copy())
+    played_dominoes.clear()
+    print(f"{trick_winner.name} won trick #{trick_num} for {trick_points} points!")
 
+    trick_num += 1
+    #print(f'Debug: the trick number is {trick_num}')
+    if trick_num > 7:
+        game_state = "calculate_game_winner"
+        print("Calculating game winner")
+    else:
+        game_state = "trick_play"'''
+######################################################################################################
+# Draw UI every frame
+# trick_text = font.render(f"Trick Play - Trump is {trump}", True, green)
+# screen.blit(trick_text, (400, 200))
 
+# turn_text = font.render(f"{current_trick_player.name}'s turn", True, green)
+# screen.blit(turn_text, (400, 250))
+######################################################################################################
+
+'''if len(played_dominoes) == 4:
+            if trump == 'no trump':
+                trick_winner, trick_points = calculate_trick_winner_NT(played_dominoes)
+            else:
+                trick_winner, trick_points = calculate_trick_winner(played_dominoes, trump)'''
 
 
 

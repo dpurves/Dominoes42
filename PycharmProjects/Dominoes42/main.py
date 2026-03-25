@@ -2,7 +2,7 @@ import pygame
 import random
 from DominoTile import DominoTile, create_domino_set
 from Player import Player, HumanPlayer, AIPlayer
-from gameLogic import calculate_trick_winner, calculate_bid_winner, calculate_game_winner
+from gameLogic import calculate_trick_winner, calculate_trick_winner_NT, calculate_bid_winner, calculate_game_winner
 from ScreenElements import PlayerLabel, load_image_safe, ImageButton, create_bid_buttons, create_trump_buttons
 all_dominoes = create_domino_set(DominoTile)
 valid_bids = ["30", "31", "32", "84", "pass"]
@@ -145,9 +145,6 @@ while running:
                 if current_bidder > 4:
                     game_state = "calculate_bid_winner"
 
-
-
-
             # winning_bidder makes a trump selection -
             # still have to figure out how to disallow other players from clicking trump buttons
 
@@ -173,11 +170,17 @@ while running:
                             current_trick_player.hand.remove(domino)
                             if len(played_dominoes) == 4:
                                 print("Trick complete! Played dominos:")
+                                if trump == 'no_trump':
+                                    game_state = "calculate_trick_winner_NT"# ← Change state!
+                                else:
+                                    game_state = "calculate_trick_winner"  # ← Change state!
+                                break
+
+
                                 for player, domino in played_dominoes:
                                     print(f"  {player.name} played {domino.name}")
 
-                                game_state = "calculate_trick_winner"  # ← Change state!
-                                break
+
 
                             current_trick_player_index = (current_trick_player_index + 1) % 4
 
@@ -345,6 +348,7 @@ while running:
                         ai3.hand.remove(domino)
                         current_trick_player_index = (current_trick_player_index + 1) % 4
                         current_trick_player = players[current_trick_player_index]
+                        print(f"Next player: {current_trick_player.name}")
                         break
 
             # Move all trick dominoes to the bottom of the screen, shrunk
@@ -357,15 +361,28 @@ while running:
                     x_pos = corner_x + (domino_num * 66)
                     y_pos = corner_y + (trick_index * 35)
                     screen.blit(small_domino, (x_pos, y_pos))
-                    # Now draw small_domino at the appropriate position'
+                    # Now draw small_domino at the appropriate position
 
-        if len(played_dominoes) == 4:
-            game_state = "calculate_trick_winner"
-            #for player, domino in played_dominoes:
-                #print(f"  {player.name} played {domino.name}")
+    if game_state == "calculate_trick_winner_NT":
+        trick_winner, trick_points = calculate_trick_winner_NT(played_dominoes)
+        if trick_winner.team == 1:
+            team_1_trick_points += trick_points
+        else:
+            team_2_trick_points += trick_points
+        current_trick_player = trick_winner
+        current_trick_player_index = players.index(trick_winner)
+        trick_history.append(played_dominoes.copy())
+        played_dominoes.clear()
+        print(f"{trick_winner.name} won trick #{trick_num} for {trick_points} points!")
 
+        trick_num += 1
+        if trick_num > 7:
+            game_state = "calculate_game_winner"
+            print("Calculating game winner")
+        else:
+            game_state = "trick_play"
 
-    if game_state == "calculate_trick_winner":
+    elif game_state == "calculate_trick_winner":
         trick_winner, trick_points = calculate_trick_winner(played_dominoes, trump)
         if trick_winner.team == 1:
             team_1_trick_points += trick_points
@@ -378,7 +395,6 @@ while running:
         print(f"{trick_winner.name} won trick #{trick_num} for {trick_points} points!")
 
         trick_num += 1
-        #print(f'Debug: the trick number is {trick_num}')
         if trick_num > 7:
             game_state = "calculate_game_winner"
             print("Calculating game winner")
@@ -406,15 +422,6 @@ while running:
         team_2_trick_points = 0
         trick_num = 1
         game_state = "dealing"
-        # Draw UI every frame
-        #trick_text = font.render(f"Trick Play - Trump is {trump}", True, green)
-        #screen.blit(trick_text, (400, 200))
-
-        #turn_text = font.render(f"{current_trick_player.name}'s turn", True, green)
-        #screen.blit(turn_text, (400, 250))
-
-
-
 
     # Update the display
     pygame.display.flip()

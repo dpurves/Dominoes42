@@ -39,7 +39,7 @@ from Player import Player, HumanPlayer, AIPlayer
                 # Can't follow suit - can play anything
                 return player.hand'''
 
-
+####################################################################################################################
 def calculate_bid_winner(players):
     highest_bid = 0
     bid_winner = None
@@ -53,17 +53,46 @@ def calculate_bid_winner(players):
             bid_winner = player
     print(f'{bid_winner.name} won the bid.')
     return bid_winner, highest_bid
+####################################################################################################################
+def calculate_trick_winner_NT(played_dominoes):
+    trick_winner = None
+    trick_points = 1
 
+    lead_player, lead_domino = played_dominoes[0]
+    lead_suit = lead_domino.hi_num
+
+    # Define best_player and best_domino as the first player/domino in played_dominoes
+    best_player, best_domino = played_dominoes[0]
+
+    for player, domino in played_dominoes[1:]:
+        if domino.hi_num == lead_suit and domino.lo_num == lead_suit:  #check if domino is the double
+            best_domino = domino
+            best_player = player
+        elif domino.has_number == lead_suit:
+            if domino.get_non_lead_num(lead_suit) > best_domino.get_non_lead_num(lead_suit):
+                best_domino = domino
+                best_player = player
+    for player, domino in played_dominoes:
+        trick_points += domino.count
+
+    trick_winner = best_player
+    return trick_winner, trick_points
+##############################################################################################
 
 def calculate_trick_winner(played_dominoes, trump):
+    # If no trump, redirect to the NT function
+    if trump == "no trump":
+        return calculate_trick_winner_NT(played_dominoes)
+
     trick_winner = None
     trick_points = 1
 
     lead_player, lead_domino = played_dominoes[0]
     if trump != "no trump" and lead_domino.is_trump(trump):
         lead_suit = trump
-    else:
+    elif trump == "no trump":
         lead_suit = lead_domino.hi_num
+
 
     # Define best_player and best_domino as the first player/domino in played_dominoes
     best_player = played_dominoes[0][0]
@@ -124,7 +153,7 @@ def calculate_trick_winner(played_dominoes, trump):
     trick_winner = best_player
     return trick_winner, trick_points
 
-
+######################################################################################################################
 
 def calculate_game_winner(bid_winner, highest_bid, team_1_trick_points, team_2_trick_points):
     if bid_winner.team == 1:            #check who won the bid
