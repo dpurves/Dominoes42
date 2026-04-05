@@ -46,7 +46,6 @@ class ImageButton(ScreenElement):
 
 class TextLabel(ScreenElement):
     #Non-clickable text display
-
     def __init__(self, x, y, text, font, color):
         # Text doesn't need width/height for clicking, but we can calculate it
         temp_surface = font.render(text, True, color)
@@ -101,11 +100,11 @@ def create_bid_buttons(bid_images, y_position=300):
     """Create all bid buttons and return them in a dictionary"""
     buttons = {}
     x_positions = {
-        30: 400,
-        31: 500,
-        32: 600,
-        84: 700,
-        'pass': 800
+        30: 350,
+        31: 450,
+        32: 550,
+        84: 650,
+        'pass': 750
     }
 
     for bid_value, x_pos in x_positions.items():

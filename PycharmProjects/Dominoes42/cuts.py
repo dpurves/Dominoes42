@@ -1,4 +1,4 @@
-# this file contains all of the code that I cut out of the other files as I altered them.
+'''# this file contains all of the code that I cut out of the other files as I altered them.
 import pygame
 
 # Initialize Pygame
@@ -6,6 +6,7 @@ pygame.init()
 
 # Set up the display
 SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 SCREEN_HEIGHT = 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Texas 42")
@@ -87,12 +88,12 @@ P4_font_rect = (40, 400)
         pygame.display.flip()
 
 # Check if AI player - if not, show front of dominoes, if so, show back of dominoes
-'''if ai1.show_hand_visual:
+if ai1.show_hand_visual:
 
         else:
-            domino_image = back_image_rotated'''
+            domino_image = back_image_rotated
 
-'''# Define the font
+# Define the font
 P1_font = pygame.font.SysFont('arial', 36)
 P2_font = pygame.font.SysFont('arial', 36)
 P3_font = pygame.font.SysFont('arial', 36)
@@ -122,7 +123,7 @@ P4_font_rect = (40, 400)'''
 '''screen.blit(P1_font, P1_font_rect)
     screen.blit(P2_font, P2_font_rect)
     screen.blit(P3_font, P3_font_rect)
-    screen.blit(P4_font, P4_font_rect)'''
+    screen.blit(P4_font, P4_font_rect)
 
 for domino in all_dominoes:
     try:
@@ -137,7 +138,7 @@ try:
 except pygame.error as e:
     print(f"Error loading back image: {e}")
 
-'''# make bidding buttons
+# make bidding buttons
         button_rect1 = pygame.Rect(400, 300, 50, 50)  # (x, y, width, height) defines the rectangle
         pygame.draw.rect(screen, red, button_rect1)
         button_text1 = font.render("30", True, green)
@@ -166,7 +167,7 @@ except pygame.error as e:
         pygame.draw.rect(screen, red, button_rect6)
         button_text6 = font.render("pass", True, green)
         text_rect6 = button_text6.get_rect(center=button_rect6.center)
-        screen.blit(button_text6, text_rect6)'''
+        screen.blit(button_text6, text_rect6)
 
 #possible alternative for bidding buttons
 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -274,7 +275,7 @@ trump5_button.draw(screen)
 trump6_button.draw(screen)
 notrump_button.draw(screen)
 ##################################################################################################
-'''if bis_button.is_clicked((mouse_x, mouse_y)):
+if bis_button.is_clicked((mouse_x, mouse_y)):
                    bid_text30 = font.render(f"Player {current_bidder} bid 30", True, green)
                    screen.blit(bidder_text, (400, 200))
                    print(f"{current_player.name} bid 30")
@@ -294,10 +295,10 @@ notrump_button.draw(screen)
                    current_bidder += 1
                elif pass_button.is_clicked((mouse_x, mouse_y)):
                    print(f"{current_player.name} passed")
-                   current_bidder += 1'''
+                   current_bidder += 1
 
 ####################################################################################################################
-'''# Special bids
+# Special bids
 bid_buttons['pass'] = load_image_safe('images/BidPass.png', 50, 50)
 bid_buttons[84] = load_image_safe('images/Bid84.png', 50, 50)
 
@@ -317,7 +318,7 @@ trump3_button = ImageButton(525, 300, 70, 70, trump_buttons[3])
 trump4_button = ImageButton(600, 300, 70, 70, trump_buttons[4])
 trump5_button = ImageButton(675, 300, 70, 70, trump_buttons[5])
 trump6_button = ImageButton(750, 300, 70, 70, trump_buttons[6])
-notrump_button = ImageButton(825, 300, 150, 70, trump_buttons['notrump'])'''
+notrump_button = ImageButton(825, 300, 150, 70, trump_buttons['notrump'])
 
 ####################################################################################
 
@@ -349,7 +350,7 @@ if game_state == "trump_selection":
 
     game_state = "trick_play"
 #################################################################################################
-'''if bid_buttons[30].is_clicked((mouse_x, mouse_y)):
+if bid_buttons[30].is_clicked((mouse_x, mouse_y)):
                     bid_text30 = font.render(f"Player {current_bidder} bid 30", True, green)
                     #screen.blit(bidder_text, (400, 200))
                     print(f"{current_player.name} bid 30")
@@ -371,12 +372,12 @@ if game_state == "trump_selection":
                     print(f"{current_player.name} passed")
                     current_bidder += 1
                 if current_bidder > 4:  #once all 4 players have bid...
-                    game_state = "calculate_bid_winner"'''
+                    game_state = "calculate_bid_winner"
 #########################################################################################################
 
 #class Domino(pygame.sprite.Sprite):
 
-'''if game_state == "calculate_trick_winner":
+if game_state == "calculate_trick_winner":
     trick_winner, trick_points = calculate_trick_winner(played_dominoes, trump)
     if trick_winner.team == 1:
         team_1_trick_points += trick_points
@@ -394,7 +395,7 @@ if game_state == "trump_selection":
         game_state = "calculate_game_winner"
         print("Calculating game winner")
     else:
-        game_state = "trick_play"'''
+        game_state = "trick_play"
 ######################################################################################################
 # Draw UI every frame
 # trick_text = font.render(f"Trick Play - Trump is {trump}", True, green)
@@ -404,12 +405,16 @@ if game_state == "trump_selection":
 # screen.blit(turn_text, (400, 250))
 ######################################################################################################
 
-'''if len(played_dominoes) == 4:
+if len(played_dominoes) == 4:
             if trump == 'no trump':
                 trick_winner, trick_points = calculate_trick_winner_NT(played_dominoes)
             else:
-                trick_winner, trick_points = calculate_trick_winner(played_dominoes, trump)'''
+                trick_winner, trick_points = calculate_trick_winner(played_dominoes, trump)
+######################################################
+trick_labels[trick_num - 1].text = f"{trick_winner.name} won for {trick_points} points"
+# render the text as a surface
+trick_font = trick_font.render('', True, '#137ea8')
+screen.blit(trick_font, (corner_x, corner_y))
 
 
-
-pygame.quit()
+pygame.quit()'''

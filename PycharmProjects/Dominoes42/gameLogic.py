@@ -92,7 +92,8 @@ def calculate_trick_winner(played_dominoes, trump):
         lead_suit = trump
     elif trump == "no trump":
         lead_suit = lead_domino.hi_num
-
+    else:
+        lead_suit = lead_domino.hi_num
 
     # Define best_player and best_domino as the first player/domino in played_dominoes
     best_player = played_dominoes[0][0]
@@ -101,7 +102,7 @@ def calculate_trick_winner(played_dominoes, trump):
 
     for player, domino in played_dominoes:
         if trump != "no trump" and domino.is_trump(trump):
-            trump_dominoes.append((player, domino))
+            trump_dominoes.append((player, domino))  #adds domino and its player to the list trump_dominoes for calculating trick winner
             print(f" {player.name} played trump: {domino.name}")
 
     #If the first domino played was a trump:
@@ -137,13 +138,15 @@ def calculate_trick_winner(played_dominoes, trump):
 
     # if there are no trumps in the trick, check dominoes against lead suit
     if not trump_dominoes:
-        best_player, best_domino = played_dominoes[0]
+        best_player, best_domino = played_dominoes[0] #initializes first player/domino as best
         for player, domino in played_dominoes[1:]:
-            if domino.hi_num == lead_suit and domino.lo_num == lead_suit:
+            if domino.hi_num == lead_suit and domino.lo_num == lead_suit: #checks if this domino is double
                 best_domino = domino
                 best_player = player
-            elif domino.has_number == lead_suit:
-                domino.get_non_lead_num(lead_suit)
+                break #the double always wins, so stop checking
+            elif best_domino.hi_num == lead_suit and best_domino.lo_num == lead_suit:
+                pass  #keep best domino as is
+            elif domino.has_number(lead_suit):  #compare non-double dominoes that follow suit
                 if domino.get_non_lead_num(lead_suit) > best_domino.get_non_lead_num(lead_suit):
                     best_domino = domino
                     best_player = player
@@ -156,20 +159,34 @@ def calculate_trick_winner(played_dominoes, trump):
 ######################################################################################################################
 
 def calculate_game_winner(bid_winner, highest_bid, team_1_trick_points, team_2_trick_points):
+
+    if highest_bid == "84":  # 84 bid is a special case, you only need to win 42 points to win
+        points_needed = 42
+    else:
+        points_needed = highest_bid
+
     if bid_winner.team == 1:            #check who won the bid
-        if team_1_trick_points >= highest_bid: # check that they got as many points as they bid
+        if team_1_trick_points >= points_needed: # check that they got as many points as they bid
             return 1                    #winning team's number
         else:
             return 2                    #winning team's number
 
     if bid_winner.team == 2:  #check who won the bid
-        if team_2_trick_points >= highest_bid:
+        if team_2_trick_points >= points_needed:
             return 2
         else:
             return 1
 
     return game_winner
 
-
+#############################################################################
+'''def calculate_match_winner(team_1_games_won, team_2_games_won):
+    if team_1_games_won == 7:
+        return 1
+    else:
+        return 2
+    return match_winner
+    # not sure I really need a function for this, but I can't figure out how else to do it right now'''
+##############################################################################
     # continue_text = font.render("Press SPACE to continue", True, green)
     # screen.blit(continue_text, (400, 600))
