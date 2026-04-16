@@ -39,9 +39,30 @@ class ImageButton(ScreenElement):
     def __init__(self, x, y, width, height, image):
         super().__init__(x, y, width, height)
         self.image = pygame.transform.scale(image, (width, height))
+        self.is_enabled = True      #for disabling bid buttons when lower than current bid
+        self.is_hovered = False     #for changing button look when it is hovered over
 
     def draw(self, screen):
-        screen.blit(self.image, (self.rect.x, self.rect.y))
+        # Create a copy of the image to apply visual effects
+        button_image = self.image.copy()
+        if not self.is_enabled:
+            # Apply dimming effect for disabled state
+            button_image.set_alpha(128)  # 50% transparency
+        elif self.is_hovered:
+            # Apply brightening effect for hover state
+            overlay = pygame.Surface(button_image.get_size(), pygame.SRCALPHA)# Creates a white surface for the overlay
+            overlay.fill((255, 255, 255, 128))  # White with 50% opacity
+            button_image.blit(overlay, (0, 0))
+        screen.blit(button_image, (self.rect.x, self.rect.y))
+
+    def update(self, mouse_pos):
+        # Update hover state based on mouse position
+        self.is_hovered = self.rect.collidepoint(mouse_pos)
+
+    def is_clicked(self, mouse_pos):
+        # Check if the button is clicked and enabled
+        return self.is_enabled and self.rect.collidepoint(mouse_pos)
+
 
 
 class TextLabel(ScreenElement):
@@ -117,18 +138,18 @@ def create_bid_buttons(bid_images, y_position=300):
     return buttons
 
 
-def create_trump_buttons(trump_images, y_position=400):
+def create_trump_buttons(trump_images, y_position=300):
     """Create all trump buttons and return them in a dictionary"""
     buttons = {}
     x_positions = {
-        0: 200,
-        1: 275,
-        2: 350,
-        3: 425,
-        4: 500,
-        5: 575,
-        6: 650,
-        'no_trump': 750
+        0: 225,
+        1: 300,
+        2: 375,
+        3: 450,
+        4: 525,
+        5: 600,
+        6: 675,
+        'no_trump': 775
     }
 
     for trump_value, x_pos in x_positions.items():

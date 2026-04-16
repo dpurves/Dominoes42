@@ -51,6 +51,13 @@ SCREEN_HEIGHT = 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Texas 42")
 
+# Load your felt texture image
+felt_texture = pygame.image.load("images/green_felt_background.png").convert()
+felt_texture = pygame.transform.scale(felt_texture, (screen.get_width(), screen.get_height()))
+# Get the size of the texture
+texture_width, texture_height = felt_texture.get_size()
+
+
 # Colors
 black = (0, 0, 0)
 blue = (0, 0, 255)
@@ -79,11 +86,13 @@ team_2_trick_points = 0
 team_1_games_won = 0
 team_2_games_won = 0
 angle = 0
+highest_bid = 0
+
 
 player_font = pygame.font.SysFont("arial", 36)
 trick_font = pygame.font.SysFont("arial", 20)
 
-player1_label = PlayerLabel(human1, 500, 5, player_font, (19, 126, 168), rotation=0)
+'''player1_label = PlayerLabel(human1, 500, 5, player_font, (19, 126, 168), rotation=0)
 player2_label = PlayerLabel(ai1, 1110, 350, player_font,(19, 126, 168), rotation=90)
 player3_label = PlayerLabel(ai2, 500, 750, player_font, (19, 126, 168), rotation= 0)
 player4_label = PlayerLabel(ai3, 40, 350, player_font,(19, 126, 168), rotation = 270)
@@ -94,7 +103,20 @@ trick3_label = TextLabel( 660, 460, "", trick_font, (19, 126, 168))
 trick4_label = TextLabel( 660, 495, "", trick_font, (19, 126, 168))
 trick5_label = TextLabel( 660, 530, "", trick_font, (19, 126, 168))
 trick6_label = TextLabel( 660, 565, "", trick_font, (19, 126, 168))
-trick7_label = TextLabel( 660, 600, "", trick_font, (19, 126, 168))
+trick7_label = TextLabel( 660, 600, "", trick_font, (19, 126, 168))'''
+
+player1_label = PlayerLabel(human1, 500, 5, player_font, (255, 255, 255), rotation=0)
+player2_label = PlayerLabel(ai1, 1110, 350, player_font,(white), rotation=90)
+player3_label = PlayerLabel(ai2, 500, 750, player_font, ("white"), rotation= 0)
+player4_label = PlayerLabel(ai3, 40, 350, player_font,("white"), rotation = 270)
+
+trick1_label = TextLabel( 660, 390, "", trick_font, (255, 255, 255))
+trick2_label = TextLabel( 660, 425, "", trick_font, (255, 255, 255))
+trick3_label = TextLabel( 660, 460, "", trick_font, (255, 255, 255))
+trick4_label = TextLabel( 660, 495, "", trick_font, (255, 255, 255))
+trick5_label = TextLabel( 660, 530, "", trick_font, (255, 255, 255))
+trick6_label = TextLabel( 660, 565, "", trick_font, (255, 255, 255))
+trick7_label = TextLabel( 660, 600, "", trick_font, (255, 255, 255))
 
 trick_labels = [trick1_label, trick2_label, trick3_label, trick4_label, trick5_label, trick6_label, trick7_label]
 
@@ -146,19 +168,20 @@ while running:
             mouse_x, mouse_y = event.pos
             # Allow players to make bids
             if game_state == "bidding":
-                if current_player.is_human:  # if player is human, player has to click a bid button
-                    try:
-                        for bid_value in bid_buttons.keys():
-                            if bid_buttons[bid_value].is_clicked((mouse_x, mouse_y)):
-                                current_player.bid = bid_value
-                                print(f'{current_player.name} bid {bid_value}')
-                                current_bidder += 1
-                                break
-                    except KeyError as e:
-                        print(f"Bid button key error: {e}")
-                else:           #if player is NOT human (i.e. AI Players), they automatically bid "pass"
-                    current_player.bid = 'pass'
-                    current_bidder += 1
+                #if current_player.is_human:  # if player is human, player has to click a bid button
+                try:
+                    for bid_value in bid_buttons.keys():
+                        if bid_buttons[bid_value].is_clicked((mouse_x, mouse_y)):
+                            current_player.bid = bid_value
+                            print(f'{current_player.name} bid {bid_value}')
+                            update_bid_buttons(bid_value)
+                            current_bidder += 1
+                            break
+                except KeyError as e:
+                    print(f"Bid button key error: {e}")
+                #else:           #if player is NOT human (i.e. AI Players), they automatically bid "pass"
+                    #current_player.bid = 'pass'
+                    #current_bidder += 1
 
                 if current_bidder > 4:
                     game_state = "calculate_bid_winner"
@@ -203,7 +226,12 @@ while running:
                             break
 
     #fill screen with black
-    screen.fill(black)
+    #screen.fill(black)
+    # Fill the screen with the texture
+    for x in range(0, screen.get_width(), texture_width):
+        for y in range(0, screen.get_height(), texture_height):
+            screen.blit(felt_texture, (0, 0))
+
 
     player1_label.draw(screen)
     player2_label.draw(screen)
@@ -216,7 +244,7 @@ while running:
     # Move all trick dominoes to the bottom of the screen, shrunk
     corner_x = 400
     corner_y = 390
-    for trick_index, trick in enumerate(trick_history):
+    for trick_index, trick in enumerate(trick_history):   # changed trick_num to trick_index to avoid variable shadowing
         for domino_num, (player, domino) in enumerate(trick):
             domino_image = domino_images[domino.name]
             small_domino = pygame.transform.scale(domino_image, (46, 26))
@@ -272,21 +300,34 @@ while running:
         y_position = y_start + (i * y_spacing)
         domino.rect = screen.blit(domino_image, (x_position, y_position))
 
+    def update_bid_buttons(bid_value):
+        global highest_bid
+        if bid_value != "pass":
+            highest_bid = max(highest_bid, bid_value)
+            # Disable buttons with bid values <= highest_bid
+            for bid, button in bid_buttons.items():
+                if bid != "pass" and bid <= highest_bid:
+                    button.is_enabled = False
+                else:
+                    button.is_enabled = True
 
     if game_state == "bidding" and current_bidder <=4:
+        mouse_pos = pygame.mouse.get_pos()
         for button in bid_buttons.values():
+            button.update(mouse_pos)
             button.draw(screen)
         current_player = players[current_bidder - 1]
-        #check if player needs input (i.e. is human)
+
+        '''#check if player needs input (i.e. is human)
         if current_player.needs_input:
             pass    #go ahead with click-handling for player's bid
         else: # if player is NOT human, automatically bid pass
             print(f"{current_player.name} passes.")
             current_player.bid = "pass"
-            current_bidder += 1
+            current_bidder += 1'''
 
         # Make player bid prompt
-        bidder_text = font.render(f"Player {current_bidder} make your bid:", True, green)
+        bidder_text = font.render(f"Player {current_bidder} make your bid:", True, white)
         screen.blit(bidder_text, (400, 200))
 
     if game_state == "calculate_bid_winner":
@@ -305,12 +346,12 @@ while running:
         for button in trump_buttons.values():
             button.draw(screen)
 
-        bidder_text = font.render(f"{bid_winner.name} chose your trump:", True, green)
+        bidder_text = font.render(f"{bid_winner.name} chose your trump:", True, white)
         screen.blit(bidder_text, (400, 200))
 
 
     if game_state == "trick_play":
-        trump_text = font.render(f"{bid_winner.name} won the bid with {highest_bid}. Trump is: {trump}", True, green)
+        trump_text = font.render(f"{bid_winner.name} won the bid with {highest_bid}. Trump is: {trump}", True, white)
         screen.blit(trump_text, (300, 200))
 
         # Sets positions for dominoes to move into when they are played
@@ -479,9 +520,9 @@ while running:
     if game_state == "game_over_display":
         # Display who won
         if game_winner == 1:
-            winner_text = font.render(f"Team 1 wins the game!", True, green)
+            winner_text = font.render(f"Team 1 wins the game!", True, white)
         else:
-            winner_text = font.render(f"Team 2 wins the game!", True, green)
+            winner_text = font.render(f"Team 2 wins the game!", True, white)
 
         screen.blit(winner_text, (400, 150))
 
