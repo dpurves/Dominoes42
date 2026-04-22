@@ -1,6 +1,9 @@
-#functions for doing calculations in the game
+##functions for doing calculations in the game
+import pygame
 from DominoTile import DominoTile
 from Player import Player, HumanPlayer, AIPlayer
+
+
 
 '''def get_valid_plays(player, lead_domino, trump, trick_num):
     # Case 1: Player is first in the trick
@@ -38,6 +41,17 @@ from Player import Player, HumanPlayer, AIPlayer
             else:
                 # Can't follow suit - can play anything
                 return player.hand'''
+
+
+def draw_trick_history(screen, trick_history, domino_images, corner_x=400, corner_y=390):
+    # To display all completed tricks as small dominoes at bottom of screen
+    for trick_index, trick in enumerate(trick_history):
+        for domino_num, (player, domino) in enumerate(trick):
+            domino_image = domino_images[domino.name]
+            small_domino = pygame.transform.scale(domino_image, (46, 26))
+            x_pos = corner_x + (domino_num * 66)
+            y_pos = corner_y + (trick_index * 35)
+            screen.blit(small_domino, (x_pos, y_pos))
 
 ####################################################################################################################
 def calculate_bid_winner(players):
@@ -95,9 +109,6 @@ def calculate_trick_winner(played_dominoes, trump):
     else:
         lead_suit = lead_domino.hi_num
 
-    # Define best_player and best_domino as the first player/domino in played_dominoes
-    best_player = played_dominoes[0][0]
-    best_domino = played_dominoes[0][1]
     trump_dominoes = [] # Find trump dominos in the trick and make a list of them
 
     for player, domino in played_dominoes:
@@ -105,51 +116,42 @@ def calculate_trick_winner(played_dominoes, trump):
             trump_dominoes.append((player, domino))  #adds domino and its player to the list trump_dominoes for calculating trick winner
             print(f" {player.name} played trump: {domino.name}")
 
-    #If the first domino played was a trump:
-    # Check each player/domino in trump_dominoes to see whether it beats the first domino played i the trick.
-    for player, domino in trump_dominoes[1:]:
-        # Check if this domino is the double trump
-        if domino.hi_num == trump and domino.lo_num == trump:
-            best_domino = domino
-            best_player = player
-        # Check if current best is double trump (if so, don't replace it)
-        elif best_domino.hi_num == trump and best_domino.lo_num == trump:
-            pass  # Keep best_domino as is
-        # Otherwise compare non-trump numbers
-        elif domino.get_non_trump_num(trump) > best_domino.get_non_trump_num(trump):
-            best_domino = domino
-            best_player = player
+    # Case 1: if there are ANY trumps played in the trick
+    if trump_dominoes:
+        best_player, best_domino = trump_dominoes[0]  # set first trump as best domino and its player as best player
 
-# if trump is not the lead suit but a trump was played
-    if lead_suit != trump and len(trump_dominoes) > 0:
-        best_player, best_domino = trump_dominoes[0]
-        for player, domino in trump_dominoes[1:]:
-            # Check if this domino is the double trump
-            if domino.hi_num == trump and domino.lo_num == trump:
-                best_domino = domino
-                best_player = player
-            # Check if current best is double trump (if so, don't replace it)
-            elif best_domino.hi_num == trump and best_domino.lo_num == trump:
-                pass  # Keep best_domino as is
-            # Otherwise compare non-trump numbers
-            elif domino.get_non_trump_num(trump) > best_domino.get_non_trump_num(trump):
-                best_domino = domino
-                best_player = player
-
-    # if there are no trumps in the trick, check dominoes against lead suit
-    if not trump_dominoes:
-        best_player, best_domino = played_dominoes[0] #initializes first player/domino as best
-        for player, domino in played_dominoes[1:]:
-            if domino.hi_num == lead_suit and domino.lo_num == lead_suit: #checks if this domino is double
-                best_domino = domino
-                best_player = player
-                break #the double always wins, so stop checking
-            elif best_domino.hi_num == lead_suit and best_domino.lo_num == lead_suit:
-                pass  #keep best domino as is
-            elif domino.has_number(lead_suit):  #compare non-double dominoes that follow suit
-                if domino.get_non_lead_num(lead_suit) > best_domino.get_non_lead_num(lead_suit):
+        # If the first trump is the double, it automatically wins - no need to check others!
+        if best_domino.is_double:
+            pass  # best_domino is already set to the double - nothing beats it
+        else:
+            # First trump is NOT the double, so check the rest
+            for player, domino in trump_dominoes[1:]:
+                # If we find the double trump, it wins immediately
+                if domino.is_double:
                     best_domino = domino
                     best_player = player
+                    break  # Stop checking - nothing beats the double
+                # Otherwise compare non-trump numbers
+                elif domino.get_non_trump_num(trump) > best_domino.get_non_trump_num(trump):
+                    best_domino = domino
+                    best_player = player
+
+    # Case 2: if there are NO trumps in the trick, check dominoes against lead suit
+    if not trump_dominoes:
+        best_player, best_domino = played_dominoes[0] #initializes first player/domino as best
+        if best_domino.is_double:
+            pass    # double always wins, so stop checking
+        else:
+            for player, domino in played_dominoes[1:]:
+                if best_domino.is_double: #checks if this domino is double
+                    best_domino = domino
+                    best_player = player
+                    break #the double always wins, so stop checking
+                elif domino.has_number(lead_suit):  #compare non-double dominoes that follow suit
+                    if domino.get_non_lead_num(lead_suit) > best_domino.get_non_lead_num(lead_suit):
+                        best_domino = domino
+                        best_player = player
+
     for player, domino in played_dominoes:
         trick_points += domino.count
 
@@ -177,7 +179,7 @@ def calculate_game_winner(bid_winner, highest_bid, team_1_trick_points, team_2_t
         else:
             return 1
 
-    return game_winner
+    raise ValueError(f"Invalid team number: {bid_winner.team}")
 
 #############################################################################
 '''def calculate_match_winner(team_1_games_won, team_2_games_won):

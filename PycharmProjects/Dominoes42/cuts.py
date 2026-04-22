@@ -20,12 +20,52 @@ white = (255, 255, 255)
 dt = 0
 running = True
 
+    # Check each player/domino in trump_dominoes to see whether it beats the first domino played in the trick.
+    for player, domino in trump_dominoes[1:]:
+        # Check if this domino is the double trump
+        if domino.hi_num == trump and domino.lo_num == trump:
+            best_domino = domino
+            best_player = player
+        # Check if current best is double trump (if so, don't replace it)
+        elif best_domino.hi_num == trump and best_domino.lo_num == trump:
+            pass  # Keep best_domino as is
+        # Otherwise compare non-trump numbers
+        elif domino.get_non_trump_num(trump) > best_domino.get_non_trump_num(trump):
+            best_domino = domino
+            best_player = player
+
+# if trump is not the lead suit but a trump was played
+    if lead_suit != trump and len(trump_dominoes) > 0:
+        best_player, best_domino = trump_dominoes[0]
+        for player, domino in trump_dominoes[1:]:
+            # Check if this domino is the double trump
+            if domino.hi_num == trump and domino.lo_num == trump:
+                best_domino = domino
+                best_player = player
+            # Check if current best is double trump (if so, don't replace it)
+            elif best_domino.hi_num == trump and best_domino.lo_num == trump:
+                pass  # Keep best_domino as is
+            # Otherwise compare non-trump numbers
+            elif domino.get_non_trump_num(trump) > best_domino.get_non_trump_num(trump):
+                best_domino = domino
+                best_player = player
 
 while running:
         # Handle events
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         running = False
+
+    for trick_index, trick in enumerate(trick_history):   # changed trick_num to trick_index to avoid variable shadowing
+        for domino_num, (player, domino) in enumerate(trick):
+            domino_image = domino_images[domino.name]
+            small_domino = pygame.transform.scale(domino_image, (46, 26))
+            x_pos = corner_x + (domino_num * 66)
+            y_pos = corner_y + (trick_index * 35)
+            screen.blit(small_domino, (x_pos, y_pos))
+
+
+
 
         newplace1 = pygame.draw.rect(screen, "#96ceb4", (200, 530, 46, 26), width=2)
         newplace2 = pygame.draw.rect(screen, "#96ceb4", (200, 560, 46, 26), width=2)
@@ -48,7 +88,18 @@ while running:
         newplace16 = pygame.draw.rect(screen, "#96ceb4", (500, 620, 46, 26), width=2)
 
 
+player1_label = PlayerLabel(human1, 500, 5, player_font, (19, 126, 168), rotation=0)
+player2_label = PlayerLabel(ai1, 1110, 350, player_font,(19, 126, 168), rotation=90)
+player3_label = PlayerLabel(ai2, 500, 750, player_font, (19, 126, 168), rotation= 0)
+player4_label = PlayerLabel(ai3, 40, 350, player_font,(19, 126, 168), rotation = 270)
 
+trick1_label = TextLabel( 660, 390, "", trick_font, (19, 126, 168))
+trick2_label = TextLabel( 660, 425, "", trick_font, (19, 126, 168))
+trick3_label = TextLabel( 660, 460, "", trick_font, (19, 126, 168))
+trick4_label = TextLabel( 660, 495, "", trick_font, (19, 126, 168))
+trick5_label = TextLabel( 660, 530, "", trick_font, (19, 126, 168))
+trick6_label = TextLabel( 660, 565, "", trick_font, (19, 126, 168))
+trick7_label = TextLabel( 660, 600, "", trick_font, (19, 126, 168))
 
 
         screen.blit(P1_font, P1_font_rect)

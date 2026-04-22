@@ -2,9 +2,10 @@ import pygame
 import random
 from DominoTile import DominoTile, create_domino_set
 from Player import Player, HumanPlayer, AIPlayer
-from gameLogic import calculate_trick_winner, calculate_trick_winner_NT, calculate_bid_winner, calculate_game_winner
+from gameLogic import calculate_trick_winner, calculate_trick_winner_NT, calculate_bid_winner, calculate_game_winner, draw_trick_history
 from ScreenElements import PlayerLabel, load_image_safe, ImageButton, create_bid_buttons, create_trump_buttons, TextLabel
-all_dominoes = create_domino_set(DominoTile)
+all_dominoes = create_domino_set()
+print(f"Debug: Total dominoes created = {len(all_dominoes)}")
 valid_bids = ["30", "31", "32", "84", "pass"]
 
 
@@ -35,10 +36,10 @@ trump_buttons = create_trump_buttons(trump_images)
 
 
 # Create players
-human1 = HumanPlayer("Player 1", 1, None)
-ai1 = AIPlayer("Player 2", 2, None)
-ai2 = AIPlayer("Player 3", 1, None)
-ai3 = AIPlayer("Player 4", 2, None)
+human1 = HumanPlayer("Player 1", 1, is_local=True)
+ai1 = AIPlayer("Player 2", 2)
+ai2 = AIPlayer("Player 3", 1)
+ai3 = AIPlayer("Player 4", 2)
 
 players = [human1, ai1, ai2, ai3]
 
@@ -87,23 +88,12 @@ team_1_games_won = 0
 team_2_games_won = 0
 angle = 0
 highest_bid = 0
-
+local_player = human1
 
 player_font = pygame.font.SysFont("arial", 36)
 trick_font = pygame.font.SysFont("arial", 20)
 
-'''player1_label = PlayerLabel(human1, 500, 5, player_font, (19, 126, 168), rotation=0)
-player2_label = PlayerLabel(ai1, 1110, 350, player_font,(19, 126, 168), rotation=90)
-player3_label = PlayerLabel(ai2, 500, 750, player_font, (19, 126, 168), rotation= 0)
-player4_label = PlayerLabel(ai3, 40, 350, player_font,(19, 126, 168), rotation = 270)
 
-trick1_label = TextLabel( 660, 390, "", trick_font, (19, 126, 168))
-trick2_label = TextLabel( 660, 425, "", trick_font, (19, 126, 168))
-trick3_label = TextLabel( 660, 460, "", trick_font, (19, 126, 168))
-trick4_label = TextLabel( 660, 495, "", trick_font, (19, 126, 168))
-trick5_label = TextLabel( 660, 530, "", trick_font, (19, 126, 168))
-trick6_label = TextLabel( 660, 565, "", trick_font, (19, 126, 168))
-trick7_label = TextLabel( 660, 600, "", trick_font, (19, 126, 168))'''
 
 player1_label = PlayerLabel(human1, 500, 5, player_font, (255, 255, 255), rotation=0)
 player2_label = PlayerLabel(ai1, 1110, 350, player_font,(white), rotation=90)
@@ -244,13 +234,7 @@ while running:
     # Move all trick dominoes to the bottom of the screen, shrunk
     corner_x = 400
     corner_y = 390
-    for trick_index, trick in enumerate(trick_history):   # changed trick_num to trick_index to avoid variable shadowing
-        for domino_num, (player, domino) in enumerate(trick):
-            domino_image = domino_images[domino.name]
-            small_domino = pygame.transform.scale(domino_image, (46, 26))
-            x_pos = corner_x + (domino_num * 66)
-            y_pos = corner_y + (trick_index * 35)
-            screen.blit(small_domino, (x_pos, y_pos))
+    draw_trick_history(screen, trick_history, domino_images)
 
 #start the dealing process
     if game_state == "dealing" and not dealing_complete:
@@ -262,6 +246,7 @@ while running:
             ai2.receive_domino(all_dominoes[i + 14])
             ai3.receive_domino(all_dominoes[i + 21])
         dealing_complete = True
+
     # Display Player 1's hand at the top
     x_start = 200
     y_position = 50  # top of screen
@@ -276,7 +261,6 @@ while running:
     y_start = 50
     y_spacing = 100  # Space between dominos
     for i, domino in enumerate(ai1.hand):
-
         domino_image = pygame.transform.rotate(domino_images[domino.name], 90)
         y_position = y_start + (i * y_spacing)
         screen.blit(domino_image, (x_position, y_position))

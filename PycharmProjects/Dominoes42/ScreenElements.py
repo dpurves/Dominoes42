@@ -1,8 +1,9 @@
 import pygame
-from Player import Player
 
+# Base class for anything that appears on screen
+# Provides common rect attribute and is_clicked() method
+# All screen elements inherit from this to ensure consistent positioning and click detection
 
-#Base class for anything that appears on screen
 class ScreenElement:
 
     def __init__(self, x, y, width, height):
@@ -16,6 +17,10 @@ class ScreenElement:
         #Check if this element was clicked
         return self.rect.collidepoint(mouse_pos)
 
+    def move(self, new_x, new_y):
+        # Move this element to a new position
+        self.rect.x = new_x
+        self.rect.y = new_y
 
 class Button(ScreenElement):
     #A clickable button with text
@@ -101,24 +106,23 @@ class PlayerLabel(ScreenElement):   #needs to stay on the screen all the time an
         screen.blit(text_surface, (self.rect.x, self.rect.y))
 
 def load_image_safe(image_path, width=None, height=None):
-    # exception handling for image loading. Returns image or fallback surface."""
-
-        try:
-            image = pygame.image.load(image_path)
-            if width and height:
-                image = pygame.transform.scale(image, (width, height))
-            return image
-        except (pygame.error, FileNotFoundError) as e:
-            print(f"Error loading image {image_path}: {e}")
-            # Return a fallback surface
-            size = (width or 50, height or 50)
-            fallback = pygame.Surface(size)
-            fallback.fill((0, 0, 0))
-            return fallback
+    # exception handling for image loading. Returns image or fallback surface.
+    try:
+        image = pygame.image.load(image_path)
+        if width and height:
+            image = pygame.transform.scale(image, (width, height))
+        return image
+    except (pygame.error, FileNotFoundError) as e:
+        print(f"Error loading image {image_path}: {e}")
+        # Return a fallback surface
+        size = (width or 50, height or 50)
+        fallback = pygame.Surface(size)
+        fallback.fill((0, 0, 0))
+        return fallback
 
 
 def create_bid_buttons(bid_images, y_position=300):
-    """Create all bid buttons and return them in a dictionary"""
+    # Create all bid buttons and return them in a dictionary
     buttons = {}
     x_positions = {
         30: 350,
@@ -139,7 +143,7 @@ def create_bid_buttons(bid_images, y_position=300):
 
 
 def create_trump_buttons(trump_images, y_position=300):
-    """Create all trump buttons and return them in a dictionary"""
+    # Create all trump buttons and return them in a dictionary
     buttons = {}
     x_positions = {
         0: 225,
