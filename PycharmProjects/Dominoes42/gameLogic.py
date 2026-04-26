@@ -3,16 +3,15 @@ import pygame
 from DominoTile import DominoTile
 from Player import Player, HumanPlayer, AIPlayer
 
+def get_valid_plays(player, played_dominoes, lead_domino, trump, trick_num):
+    valid_plays = []
 
-
-'''def get_valid_plays(player, lead_domino, trump, trick_num):
     # Case 1: Player is first in the trick
     if lead_domino is None:
         if trick_num == 1:
             # Must play trump on first trick
             valid_plays = [d for d in player.hand if d.is_trump(trump)]
-
-            if valid_plays:   #make sure the player HAS a trump in his hand
+            if valid_plays:  # make sure the player HAS a trump in his hand
                 return valid_plays
             else:
                 return player.hand
@@ -21,28 +20,25 @@ from Player import Player, HumanPlayer, AIPlayer
             return player.hand
 
     # Case 2: Player is NOT first - must follow suit if possible
-    else:
-        # Determine the lead suit
-        if lead_domino.is_trump(trump):
-            # check if lead domino is a trump
-            valid_plays = [d for d in player.hand if d.is_trump(trump)]
-            if valid_plays:  # make sure the player HAS a trump in his hand
-                return valid_plays
-            else:
-                return player.hand
+    # Determine the lead suit
+    if lead_domino.is_trump(trump):
+        # check if lead domino is a trump
+        valid_plays = [d for d in player.hand if d.is_trump(trump)]
+        if valid_plays:  # make sure the player HAS a trump in his hand
+            return valid_plays
+        else:
+            return player.hand
+    else:  # if the lead domino was NOT a trump
+        # Find all dominoes that match lead suit (excluding trump if lead is not trump!)
+        valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num) and not d.is_trump(trump)]
+        # If we found matching dominoes, return those
+        if valid_plays:
+            return valid_plays
+        else:
+            # Can't follow suit - can play anything
+            return player.hand
 
-        else:    #if the lead domino ws NOT a trump
-            # Find all dominoes that match lead suit (excluding trump if lead is not trump!)
-            valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num) and not d.is_trump(trump)]
-
-            # If we found matching dominoes, return those
-            if valid_plays:
-                return valid_plays
-            else:
-                # Can't follow suit - can play anything
-                return player.hand'''
-
-
+#############################################################################################################
 def draw_trick_history(screen, trick_history, domino_images, corner_x=400, corner_y=390):
     # To display all completed tricks as small dominoes at bottom of screen
     for trick_index, trick in enumerate(trick_history):
@@ -79,7 +75,7 @@ def calculate_trick_winner_NT(played_dominoes):
     best_player, best_domino = played_dominoes[0]
 
     for player, domino in played_dominoes[1:]:
-        if domino.hi_num == lead_suit and domino.lo_num == lead_suit:  #check if domino is the double
+        if domino.hi_num == lead_suit and domino.lo_num == lead_suit:  #check if domino is the double OF THE LEAD SUIT
             best_domino = domino
             best_player = player
         elif domino.has_number == lead_suit:
@@ -118,7 +114,7 @@ def calculate_trick_winner(played_dominoes, trump):
 
     # Case 1: if there are ANY trumps played in the trick
     if trump_dominoes:
-        best_player, best_domino = trump_dominoes[0]  # set first trump as best domino and its player as best player
+        best_player, best_domino = trump_dominoes[0]  # set first trump played as best domino and its player as best player
 
         # If the first trump is the double, it automatically wins - no need to check others!
         if best_domino.is_double:
@@ -143,7 +139,7 @@ def calculate_trick_winner(played_dominoes, trump):
             pass    # double always wins, so stop checking
         else:
             for player, domino in played_dominoes[1:]:
-                if best_domino.is_double: #checks if this domino is double
+                if domino.hi_num == lead_suit and domino.lo_num == lead_suit: #checks if this domino is double of lead suit
                     best_domino = domino
                     best_player = player
                     break #the double always wins, so stop checking

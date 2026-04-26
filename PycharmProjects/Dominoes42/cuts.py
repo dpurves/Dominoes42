@@ -63,10 +63,44 @@ while running:
             x_pos = corner_x + (domino_num * 66)
             y_pos = corner_y + (trick_index * 35)
             screen.blit(small_domino, (x_pos, y_pos))
+######################################################################
+def get_valid_plays(player, lead_domino, trump, trick_num):
+    # Case 1: Player is first in the trick
+    if lead_domino is None:
+        if trick_num == 1:
+            # Must play trump on first trick
+            valid_plays = [d for d in player.hand if d.is_trump(trump)]
 
+            if valid_plays:   #make sure the player HAS a trump in his hand
+                return valid_plays
+            else:
+                return player.hand
+        else:
+            # Can play anything
+            return player.hand
 
+    # Case 2: Player is NOT first - must follow suit if possible
+    else:
+        # Determine the lead suit
+        if lead_domino.is_trump(trump):
+            # check if lead domino is a trump
+            valid_plays = [d for d in player.hand if d.is_trump(trump)]
+            if valid_plays:  # make sure the player HAS a trump in his hand
+                return valid_plays
+            else:
+                return player.hand
 
+        else:    #if the lead domino ws NOT a trump
+            # Find all dominoes that match lead suit (excluding trump if lead is not trump!)
+            valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num) and not d.is_trump(trump)]
 
+            # If we found matching dominoes, return those
+            if valid_plays:
+                return valid_plays
+            else:
+                # Can't follow suit - can play anything
+                return player.hand
+###################################################################################################
         newplace1 = pygame.draw.rect(screen, "#96ceb4", (200, 530, 46, 26), width=2)
         newplace2 = pygame.draw.rect(screen, "#96ceb4", (200, 560, 46, 26), width=2)
         newplace3 = pygame.draw.rect(screen, "#96ceb4", (200, 590, 46, 26), width=2)

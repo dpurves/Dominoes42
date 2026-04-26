@@ -69,7 +69,6 @@ class ImageButton(ScreenElement):
         return self.is_enabled and self.rect.collidepoint(mouse_pos)
 
 
-
 class TextLabel(ScreenElement):
     #Non-clickable text display
     def __init__(self, x, y, text, font, color):
@@ -80,9 +79,27 @@ class TextLabel(ScreenElement):
         self.font = font
         self.color = color
 
+    def center_x(self, screen_width):
+        #Center the label horizontally on the screen at the given y coordinate.
+        text_width = self.font.size(self.text)[0]
+        x = (screen_width - text_width) // 2
+        self.rect.x = x
+
     def draw(self, screen):
+        #draw shadow first
+        shadow_surface = self.font.render(self.text, True, (0, 0, 0))  # Black shadow
+        screen.blit(shadow_surface, (self.rect.x + 2, self.rect.y + 2)) # Blit shadow slightly offset (+2 pixels)
+
+        #draw main text on top
         text_surface = self.font.render(self.text, True, self.color)
         screen.blit(text_surface, (self.rect.x, self.rect.y))
+
+        # Create and rotate the main text
+        text_surface = self.font.render(self.text, True, self.color)
+        # Blit main text
+        screen.blit(text_surface, (self.rect.x, self.rect.y))
+
+
 
 class PlayerLabel(ScreenElement):   #needs to stay on the screen all the time and not change
     def __init__(self, player, x, y, font, color, rotation=0):
@@ -97,13 +114,26 @@ class PlayerLabel(ScreenElement):   #needs to stay on the screen all the time an
     def draw(self, screen):
         # Show name and team
         text = f"{self.player.name} (Team {self.player.team})"
-        text_surface = self.font.render(text, True, self.color)
+        #text_surface = self.font.render(text, True, self.color)
+        # Create and rotate the shadow
+        shadow_surface = self.font.render(text, True, (0, 0, 0))  # Black shadow
+        if self.rotation != 0:
+            shadow_surface = pygame.transform.rotate(shadow_surface, self.rotation)
+        # Blit shadow slightly offset (+2 pixels)
+        screen.blit(shadow_surface, (self.rect.x + 2, self.rect.y + 2))
 
-    # rotate if needed
+        # Create and rotate the main text
+        text_surface = self.font.render(text, True, self.color)
         if self.rotation != 0:
             text_surface = pygame.transform.rotate(text_surface, self.rotation)
-
+        # Blit main text
         screen.blit(text_surface, (self.rect.x, self.rect.y))
+
+    # rotate if needed
+        #if self.rotation != 0:
+            #text_surface = pygame.transform.rotate(text_surface, self.rotation)
+
+        #screen.blit(text_surface, (self.rect.x, self.rect.y))
 
 def load_image_safe(image_path, width=None, height=None):
     # exception handling for image loading. Returns image or fallback surface.

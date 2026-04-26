@@ -2,7 +2,7 @@ import pygame
 import random
 from DominoTile import DominoTile, create_domino_set
 from Player import Player, HumanPlayer, AIPlayer
-from gameLogic import calculate_trick_winner, calculate_trick_winner_NT, calculate_bid_winner, calculate_game_winner, draw_trick_history
+from gameLogic import calculate_trick_winner, calculate_trick_winner_NT, calculate_bid_winner, calculate_game_winner, draw_trick_history, get_valid_plays
 from ScreenElements import PlayerLabel, load_image_safe, ImageButton, create_bid_buttons, create_trump_buttons, TextLabel
 all_dominoes = create_domino_set()
 print(f"Debug: Total dominoes created = {len(all_dominoes)}")
@@ -69,12 +69,12 @@ white = (255, 255, 255)
 #font objects
 font = pygame.font.SysFont('arial', 36)
 
-game_state = "dealing"
+game_state = "intro"
 dealing_complete = False
 game_winner = None
 current_bidder = 1      # For the purposes of this project, Player 1 will bid first in game_state == "bidding"
 current_trick_player = None         #initializes current_trick_player for game_state = "trick_play"
-current_trick_player_index = None   #initializes current_trick_player_index for rotating playhers in game_state == "trick_play"
+current_trick_player_index = None   #initializes current_trick_player_index for rotating players in game_state == "trick_play"
 trump = None
 played_dominoes = [] #List of tuples (player, domino)
 lead_suit = None
@@ -90,10 +90,8 @@ angle = 0
 highest_bid = 0
 local_player = human1
 
-player_font = pygame.font.SysFont("arial", 36)
+player_font = pygame.font.SysFont("arial", 36, bold=True)
 trick_font = pygame.font.SysFont("arial", 20)
-
-
 
 player1_label = PlayerLabel(human1, 500, 5, player_font, (255, 255, 255), rotation=0)
 player2_label = PlayerLabel(ai1, 1110, 350, player_font,(white), rotation=90)
@@ -109,6 +107,15 @@ trick6_label = TextLabel( 660, 565, "", trick_font, (255, 255, 255))
 trick7_label = TextLabel( 660, 600, "", trick_font, (255, 255, 255))
 
 trick_labels = [trick1_label, trick2_label, trick3_label, trick4_label, trick5_label, trick6_label, trick7_label]
+
+intro_label = TextLabel(250, 200, "", font=player_font, color=(255, 255, 255))
+game_over_label = TextLabel(350, 150, "", font=player_font, color=(255, 255, 255))
+start_bidding_label = TextLabel(350, 250, "", font=player_font, color=(255, 255, 255))
+bidding_label = TextLabel(400, 200, "", font=player_font, color=(255, 255, 255))
+trump_selection_label = TextLabel(400, 200, "", font=player_font, color=(255, 255, 255))
+score_label = TextLabel(400, 200, "", font=player_font, color=(255, 255, 255))
+continue_label = TextLabel(400, 300, "", font=player_font, color=(255, 255, 255))
+game_start_label = TextLabel(250, 150, "", font=player_font, color=(255, 255, 255))
 
 # Game loop
 running = True
@@ -142,6 +149,8 @@ while running:
                     ai1.hand.clear()
                     ai2.hand.clear()
                     ai3.hand.clear()
+                    game_state = "dealing"
+                elif game_state == "intro":
                     game_state = "dealing"
                 elif game_state == "dealing":
                     game_state = "bidding"
@@ -221,12 +230,15 @@ while running:
     for x in range(0, screen.get_width(), texture_width):
         for y in range(0, screen.get_height(), texture_height):
             screen.blit(felt_texture, (0, 0))
+    # Clear continue_label by default
+    continue_label.text = ""
 
-
-    player1_label.draw(screen)
-    player2_label.draw(screen)
-    player3_label.draw(screen)
-    player4_label.draw(screen)
+    if game_state in ["dealing", "bidding", "calculate_bid_winner", "trump_selection",
+                      "trick_play", "calculate_trick_winner", "trick_over_display"]:
+        player1_label.draw(screen)
+        player2_label.draw(screen)
+        player3_label.draw(screen)
+        player4_label.draw(screen)
 
     for label in trick_labels:
         label.draw(screen)
@@ -235,6 +247,10 @@ while running:
     corner_x = 400
     corner_y = 390
     draw_trick_history(screen, trick_history, domino_images)
+
+    if game_state == "intro":
+        intro_label.text = "Welcome to Dominoes 42! Press SPACE to start!"
+        intro_label.draw(screen)
 
 #start the dealing process
     if game_state == "dealing" and not dealing_complete:
@@ -246,6 +262,10 @@ while running:
             ai2.receive_domino(all_dominoes[i + 14])
             ai3.receive_domino(all_dominoes[i + 21])
         dealing_complete = True
+    elif game_state == "dealing" and dealing_complete:
+        start_bidding_label.text = f"Press SPACE to start bidding!"
+        start_bidding_label.center_x(SCREEN_WIDTH)
+        start_bidding_label.draw(screen)
 
     # Display Player 1's hand at the top
     x_start = 200
@@ -284,6 +304,8 @@ while running:
         y_position = y_start + (i * y_spacing)
         domino.rect = screen.blit(domino_image, (x_position, y_position))
 
+
+
     def update_bid_buttons(bid_value):
         global highest_bid
         if bid_value != "pass":
@@ -301,6 +323,7 @@ while running:
             button.update(mouse_pos)
             button.draw(screen)
         current_player = players[current_bidder - 1]
+        continue_label.text = ""
 
         '''#check if player needs input (i.e. is human)
         if current_player.needs_input:
@@ -311,10 +334,15 @@ while running:
             current_bidder += 1'''
 
         # Make player bid prompt
-        bidder_text = font.render(f"Player {current_bidder} make your bid:", True, white)
-        screen.blit(bidder_text, (400, 200))
+        bidding_label.text = f"Player {current_bidder} make your bid:"
+        bidding_label.center_x(SCREEN_WIDTH)
+        bidding_label.draw(screen)
+
+    #if current_bidder > 4:
+        #game_state = "calculate_bid_winner"
 
     if game_state == "calculate_bid_winner":
+        bidding_label.text = ""
         bid_winner, highest_bid = calculate_bid_winner(players)
         button_rectBW = pygame.Rect(400, 200, 350, 50)  # (x, y, width, height) defines the rectangle
         pygame.draw.rect(screen, black, button_rectBW)
@@ -323,6 +351,11 @@ while running:
         screen.blit(button_textBW, text_rectBW)
         game_state = "trump_selection"
 
+        continue_label.text = f"Press SPACE to choose your trump!"
+        continue_label.center_x(SCREEN_WIDTH)
+        continue_label.draw(screen)
+
+
 # make trump selection buttons
     if game_state == "trump_selection":
         #TODO: still need to make it so that only the bid_winner can click trump buttons!!!
@@ -330,13 +363,17 @@ while running:
         for button in trump_buttons.values():
             button.draw(screen)
 
-        bidder_text = font.render(f"{bid_winner.name} chose your trump:", True, white)
-        screen.blit(bidder_text, (400, 200))
-
+        # Make trump selection prompt
+        trump_selection_label.text = f"{bid_winner.name} chose your trump:"
+        trump_selection_label.center_x(SCREEN_WIDTH)
+        trump_selection_label.draw(screen)
 
     if game_state == "trick_play":
-        trump_text = font.render(f"{bid_winner.name} won the bid with {highest_bid}. Trump is: {trump}", True, white)
-        screen.blit(trump_text, (300, 200))
+        game_start_label.text = f"{bid_winner.name} won the bid with {highest_bid}. Trump is: {trump}"
+        game_start_label.center_x(SCREEN_WIDTH)
+        game_start_label.draw(screen)
+        trump_selection_label.text = ""
+
 
         # Sets positions for dominoes to move into when they are played
         play_positions = [
@@ -362,6 +399,9 @@ while running:
         elif current_trick_player is not None:  # Safety check
             # Check for Player 1 (human1)
             if current_trick_player == human1:
+                valid_plays = get_valid_plays(human1, played_dominoes, lead_domino, trump, trick_num)
+                for domino in valid_plays:
+                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in human1.hand:
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
@@ -374,6 +414,9 @@ while running:
 
             # Check for Player 2 (ai1)
             elif current_trick_player == ai1:
+                valid_plays = get_valid_plays(ai1, played_dominoes, lead_domino, trump, trick_num)
+                for domino in valid_plays:
+                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in ai1.hand:
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
@@ -386,6 +429,9 @@ while running:
 
             # Check for Player 3 (ai2)
             elif current_trick_player == ai2:
+                valid_plays = get_valid_plays(ai2, played_dominoes, lead_domino, trump, trick_num)
+                for domino in valid_plays:
+                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in ai2.hand:
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
@@ -398,6 +444,9 @@ while running:
 
             # Check for Player 4 (ai3)
             elif current_trick_player == ai3:
+                valid_plays = get_valid_plays(ai3, played_dominoes, lead_domino, trump, trick_num)
+                for domino in valid_plays:
+                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in ai3.hand:
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
@@ -428,13 +477,8 @@ while running:
         # change the text in the trick label
         trick_labels[trick_num - 1].text = f"{trick_winner.name} won trick {trick_num} for {trick_points} points"
 
-        #print(f"Set label text: {trick_labels[trick_num - 1].text}")
-        #print(f"Label position: x={trick_labels[trick_num - 1].rect.x}, y={trick_labels[trick_num - 1].rect.y}")
-        #print(f"Label text: '{trick_labels[trick_num - 1].text}'")
         pygame.display.update()
-        # If this is trick 7, add a delay so the label is visible
-        #if trick_num == 7:
-            #pygame.time.delay(2000)  # 2 second delay to see trick 7 result
+
         current_trick_player = trick_winner # Trick winner plays first in the next trick
         current_trick_player_index = players.index(trick_winner)
         trick_history.append(played_dominoes.copy()) # Add the trick to trick_history to eventually determine game winner
@@ -455,13 +499,9 @@ while running:
             team_2_trick_points += trick_points
         # change the text in the trick label
         trick_labels[trick_num - 1].text = f"{trick_winner.name} won trick {trick_num} for {trick_points} points."
-        #print(f"Set label text: {trick_labels[trick_num - 1].text}")
-        #print(f"Label position: x={trick_labels[trick_num - 1].rect.x}, y={trick_labels[trick_num - 1].rect.y}")
-        #print(f"Label text: '{trick_labels[trick_num - 1].text}'")
+
         pygame.display.update()
-        # If this is trick 7, add a delay so the label is visible
-        #if trick_num == 7:
-            #pygame.time.delay(2000)  # 2 second delay to see trick 7 result
+
         current_trick_player = trick_winner
         current_trick_player_index = players.index(trick_winner)
         trick_history.append(played_dominoes.copy())
@@ -469,7 +509,6 @@ while running:
         trick_num += 1
         if trick_num > 7:
             game_state = "calculate_game_winner"
-            #print("Calculating game winner")
         else:
             played_dominoes.clear()
             game_state = "trick_play"
@@ -504,21 +543,23 @@ while running:
     if game_state == "game_over_display":
         # Display who won
         if game_winner == 1:
-            winner_text = font.render(f"Team 1 wins the game!", True, white)
-        else:
-            winner_text = font.render(f"Team 2 wins the game!", True, white)
+            game_over_label.text = "Team 1 wins the game!"
+            game_over_label.center_x(SCREEN_WIDTH)
+            game_over_label.draw(screen)
 
-        screen.blit(winner_text, (400, 150))
+        else:
+            game_over_label.text = "Team 2 wins the game!"
+            game_over_label.center_x(SCREEN_WIDTH)
+            game_over_label.draw(screen)
 
         # Display current game score
-        score_text = font.render(f"Team 1: {team_1_games_won}  Team 2: {team_2_games_won}", True, white)
-        screen.blit(score_text, (400, 200))
-
+        score_label.text = f"Team 1: {team_1_games_won}  Team 2: {team_2_games_won}"
+        score_label.center_x(SCREEN_WIDTH)
+        score_label.draw(screen)
         # Display continue prompt
-        continue_text = font.render("Press SPACE to start next game", True, white)
-        screen.blit(continue_text, (350, 250))
-
-
+        continue_label.text = "Press SPACE to start next game"
+        continue_label.center_x(SCREEN_WIDTH)
+        continue_label.draw(screen)
 
 
     # Update the display
