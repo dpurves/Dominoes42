@@ -205,6 +205,8 @@ while running:
                         if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                             print(f"{current_trick_player.name} playing {domino.name}!")
                             played_dominoes.append((current_trick_player, domino))
+                            if len(played_dominoes) == 1:  # First domino of the trick
+                                lead_domino = domino
                             current_trick_player.hand.remove(domino)
                             if len(played_dominoes) == 4:
                                 print("Trick complete! Played dominos:")
@@ -400,12 +402,16 @@ while running:
             # Check for Player 1 (human1)
             if current_trick_player == human1:
                 valid_plays = get_valid_plays(human1, played_dominoes, lead_domino, trump, trick_num)
-                for domino in valid_plays:
-                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
+                    #for domino in valid_plays:
+                    # pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in human1.hand:
+                    if domino in valid_plays:
+                        pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
                         played_dominoes.append((player, domino))
+                        if len(played_dominoes) == 1:  # First domino of the trick
+                            lead_domino = domino
                         human1.hand.remove(domino)
                         current_trick_player_index = (current_trick_player_index + 1) % 4
                         current_trick_player = players[current_trick_player_index]
@@ -415,12 +421,16 @@ while running:
             # Check for Player 2 (ai1)
             elif current_trick_player == ai1:
                 valid_plays = get_valid_plays(ai1, played_dominoes, lead_domino, trump, trick_num)
-                for domino in valid_plays:
-                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
+                #for domino in valid_plays:
+                    #pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in ai1.hand:
+                    if domino in valid_plays:
+                        pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green borde
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
                         played_dominoes.append((player, domino))
+                        if len(played_dominoes) == 1:  # First domino of the trick
+                            lead_domino = domino
                         ai1.hand.remove(domino)
                         current_trick_player_index = (current_trick_player_index + 1) % 4
                         current_trick_player = players[current_trick_player_index]
@@ -430,12 +440,16 @@ while running:
             # Check for Player 3 (ai2)
             elif current_trick_player == ai2:
                 valid_plays = get_valid_plays(ai2, played_dominoes, lead_domino, trump, trick_num)
-                for domino in valid_plays:
-                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
+                #for domino in valid_plays:
+                 #   pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in ai2.hand:
+                    if domino in valid_plays:
+                        pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green b
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
                         played_dominoes.append((player, domino))
+                        if len(played_dominoes) == 1:  # First domino of the trick
+                            lead_domino = domino
                         ai2.hand.remove(domino)
                         current_trick_player_index = (current_trick_player_index + 1) % 4
                         current_trick_player = players[current_trick_player_index]
@@ -445,12 +459,16 @@ while running:
             # Check for Player 4 (ai3)
             elif current_trick_player == ai3:
                 valid_plays = get_valid_plays(ai3, played_dominoes, lead_domino, trump, trick_num)
-                for domino in valid_plays:
-                    pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
+                #for domino in valid_plays:
+                    #pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green border
                 for domino in ai3.hand:
+                    if domino in valid_plays:
+                        pygame.draw.rect(screen, (0, 200, 0), domino.rect, 4)  # 4-pixel green b
                     if domino.rect is not None and domino.rect.collidepoint(mouse_x, mouse_y):
                         print(f"{current_trick_player.name} playing {domino.name}!")
                         played_dominoes.append((player, domino))
+                        if len(played_dominoes) == 1:  # First domino of the trick
+                            lead_domino = domino
                         ai3.hand.remove(domino)
                         current_trick_player_index = (current_trick_player_index + 1) % 4
                         current_trick_player = players[current_trick_player_index]

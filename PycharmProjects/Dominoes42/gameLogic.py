@@ -3,42 +3,69 @@ import pygame
 from DominoTile import DominoTile
 from Player import Player, HumanPlayer, AIPlayer
 
+
 def get_valid_plays(player, played_dominoes, lead_domino, trump, trick_num):
+    #print(f"DEBUG: trump={trump}, type={type(trump)}, trick_num={trick_num}, lead_domino={lead_domino}")
     valid_plays = []
 
-    # Case 1: Player is first in the trick
-    if lead_domino is None:
-        if trick_num == 1:
-            # Must play trump on first trick
+    # Case 1: Declared Trump
+    if trump != "no_trump":
+        if lead_domino is None and trick_num == 1:  # special case: first domino of first trick
+            try:
+                valid_plays = [d for d in player.hand if d.is_trump(trump)]
+                if valid_plays:  # make sure the player HAS a trump in his hand
+                    return valid_plays
+                else:
+                    #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)} total")
+                    return []  # player has no trumps but return empty list to prevent crash
+
+            except Error as e:
+                print(f"If you declare a trump, you MUST play a trump in the first trick!: {e}")
+                #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)} total")
+                return []
+        elif lead_domino is not None and trick_num == 1:
             valid_plays = [d for d in player.hand if d.is_trump(trump)]
-            if valid_plays:  # make sure the player HAS a trump in his hand
+            if valid_plays:
+                #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)} total")
                 return valid_plays
+        elif trick_num >= 2:   # second and subsequent tricks
+            if lead_domino is None: # first domino in later tricks
+                return player.hand  # can play anything
+            elif lead_domino.is_trump(trump):
+               valid_plays = [d for d in player.hand if d.is_trump(trump)]
+               if valid_plays:
+                   #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)} total")
+                   return valid_plays
+               else:
+                   #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)}")
+                   return player.hand
+            else:  # lead domino is NOT trump
+                lead_suit = lead_domino.hi_num
+                valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num)]
+                if valid_plays:
+                    #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)} total")
+                    return valid_plays
+                else:
+                    #print(f"Returning {len(valid_plays)} valid plays out of {len(player.hand)} total")
+                    return player.hand
+
+
+# Case 2: No Trump
+    else:
+        #valid_plays = []
+        if not played_dominoes:  # first domino in the trick
+            valid_plays = player.hand  # can play any domino
+        elif lead_domino:
+            valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num)]
+            # Case 1A: player has a domino of the lead suit in hand
+            if valid_plays:
+                return valid_plays  # must play dominos of lead suit
+
+            # Case 1B: player does NOT have a domino of the lead suit in hand
             else:
-                return player.hand
-        else:
-            # Can play anything
-            return player.hand
+                return player.hand  # can play anything
 
-    # Case 2: Player is NOT first - must follow suit if possible
-    # Determine the lead suit
-    if lead_domino.is_trump(trump):
-        # check if lead domino is a trump
-        valid_plays = [d for d in player.hand if d.is_trump(trump)]
-        if valid_plays:  # make sure the player HAS a trump in his hand
-            return valid_plays
-        else:
-            return player.hand
-    else:  # if the lead domino was NOT a trump
-        # Find all dominoes that match lead suit (excluding trump if lead is not trump!)
-        valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num) and not d.is_trump(trump)]
-        # If we found matching dominoes, return those
-        if valid_plays:
-            return valid_plays
-        else:
-            # Can't follow suit - can play anything
-            return player.hand
-
-#############################################################################################################
+# #############################################################################################################
 def draw_trick_history(screen, trick_history, domino_images, corner_x=400, corner_y=390):
     # To display all completed tricks as small dominoes at bottom of screen
     for trick_index, trick in enumerate(trick_history):
@@ -185,6 +212,4 @@ def calculate_game_winner(bid_winner, highest_bid, team_1_trick_points, team_2_t
         return 2
     return match_winner
     # not sure I really need a function for this, but I can't figure out how else to do it right now'''
-##############################################################################
-    # continue_text = font.render("Press SPACE to continue", True, green)
-    # screen.blit(continue_text, (400, 600))
+

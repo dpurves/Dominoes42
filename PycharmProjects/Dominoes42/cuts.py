@@ -359,6 +359,46 @@ trump4_button.draw(screen)
 trump5_button.draw(screen)
 trump6_button.draw(screen)
 notrump_button.draw(screen)
+
+
+
+
+def get_valid_plays(player, played_dominoes, lead_domino, trump, trick_num):
+    valid_plays = []
+
+    # Case 1: Player is first in the trick
+    if lead_domino is None:
+        if trick_num == 1:
+            # Must play trump on first trick
+            valid_plays = [d for d in player.hand if d.is_trump(trump)]
+            if valid_plays:  # make sure the player HAS a trump in his hand
+                return valid_plays
+            else:
+                return player.hand
+        else:
+            # Can play anything
+            return player.hand
+
+    # Case 2: Player is NOT first - must follow suit if possible
+    # Determine the lead suit
+    if lead_domino.is_trump(trump):
+        # check if lead domino is a trump
+        valid_plays = [d for d in player.hand if d.is_trump(trump)]
+        if valid_plays:  # make sure the player HAS a trump in his hand
+            return valid_plays
+        else:
+            return player.hand
+    else:  # if the lead domino was NOT a trump
+        # Find all dominoes that match lead suit (excluding trump if lead is not trump!)
+        valid_plays = [d for d in player.hand if d.has_number(lead_domino.hi_num) and not d.is_trump(trump)]
+        # If we found matching dominoes, return those
+        if valid_plays:
+            return valid_plays
+        else:
+            # Can't follow suit - can play anything
+            return player.hand
+
+
 ##################################################################################################
 if bis_button.is_clicked((mouse_x, mouse_y)):
                    bid_text30 = font.render(f"Player {current_bidder} bid 30", True, green)
